@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraEstate AI — Linear Regression & Decision Tree House Price Predictor</title>
+  <meta name="description" content="Predict real estate valuation with dual Linear Regression and Decision Tree machine learning models.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="background-glow">
+    <div class="glow-sphere sphere-1"></div>
+    <div class="glow-sphere sphere-2"></div>
+    <div class="glow-sphere sphere-3"></div>
+  </div>
+
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="logo-group">
+        <div class="logo-icon">🏠</div>
+        <div>
+          <h1 class="logo-title">AuraEstate <span class="gradient-text">AI</span></h1>
+          <p class="logo-subtitle">Dual ML Engine: Linear Regression & Decision Tree</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="status-badge" id="system-status">
+          <span class="status-dot"></span> 2 Models Live
+        </span>
+        <span class="accuracy-badge">
+          LR: <strong>99.78% R²</strong> • DT: <strong>99.57% R²</strong>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-layout">
+    <!-- Left Column: Controls & Features -->
+    <section class="controls-panel">
+      <!-- Model Selector Switcher -->
+      <div class="panel-card model-switcher-card">
+        <div class="card-header">
+          <span class="icon">🧠</span>
+          <h3>Active Prediction Algorithm</h3>
+        </div>
+        <div class="model-segmented-control" id="model-selector">
+          <button type="button" class="model-seg-btn active" data-model="linear_regression">
+            <span class="seg-icon">📈</span>
+            <span class="seg-text">Linear Regression</span>
+            <span class="seg-acc">99.78% R²</span>
+          </button>
+          <button type="button" class="model-seg-btn" data-model="decision_tree">
+            <span class="seg-icon">🌳</span>
+            <span class="seg-text">Decision Tree</span>
+            <span class="seg-acc">99.57% R²</span>
+          </button>
+          <button type="button" class="model-seg-btn" data-model="both">
+            <span class="seg-icon">⚖️</span>
+            <span class="seg-text">Compare Both</span>
+            <span class="seg-acc">Consensus</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Presets -->
+      <div class="panel-card presets-card">
+        <div class="card-header">
+          <span class="icon">⚡</span>
+          <h3>Quick Property Archetypes</h3>
+        </div>
+        <p class="section-desc">Select a baseline preset or customize every parameter below:</p>
+        <div class="preset-buttons">
+          <button type="button" class="preset-btn" data-preset="starter">
+            <span class="preset-icon">🏢</span>
+            <span class="preset-title">1 BHK Starter</span>
+            <span class="preset-sub">650 sqft • Score 5</span>
+          </button>
+          <button type="button" class="preset-btn" data-preset="comfort">
+            <span class="preset-icon">🏡</span>
+            <span class="preset-title">2 BHK Comfort</span>
+            <span class="preset-sub">1,000 sqft • Score 8</span>
+          </button>
+          <button type="button" class="preset-btn active" data-preset="family">
+            <span class="preset-icon">🏘️</span>
+            <span class="preset-title">3 BHK Prime</span>
+            <span class="preset-sub">1,500 sqft • Score 9</span>
+          </button>
+          <button type="button" class="preset-btn" data-preset="luxury">
+            <span class="preset-icon">🏰</span>
+            <span class="preset-title">Luxury Villa</span>
+            <span class="preset-sub">2,400 sqft • Score 10</span>
+          </button>
+        </div>
+      </div>
+
+      <form id="prediction-form" class="prediction-form">
+        <!-- 1. Space & Layout -->
+        <div class="panel-card">
+          <div class="card-header">
+            <span class="icon">📐</span>
+            <h3>Space & Layout</h3>
+          </div>
+          <div class="form-grid">
+            <div class="input-control full-width">
+              <div class="label-row">
+                <label for="input-area">Living Area (sq.ft)</label>
+                <span class="val-display" id="val-area">1,500 sqft</span>
+              </div>
+              <input type="range" id="input-area" min="600" max="3000" step="25" value="1500" class="custom-slider">
+              <div class="range-labels">
+                <span>600 sqft</span>
+                <span>1,500</span>
+                <span>3,000 sqft</span>
+              </div>
+            </div>
+
+            <div class="input-control">
+              <label for="input-bedrooms">Bedrooms</label>
+              <div class="stepper">
+                <button type="button" class="step-btn" data-action="dec" data-target="input-bedrooms">−</button>
+                <input type="number" id="input-bedrooms" min="1" max="8" value="3" readonly>
+                <button type="button" class="step-btn" data-action="inc" data-target="input-bedrooms">+</button>
+              </div>
+            </div>
+
+            <div class="input-control">
+              <label for="input-bathrooms">Bathrooms</label>
+              <div class="stepper">
+                <button type="button" class="step-btn" data-action="dec" data-target="input-bathrooms">−</button>
+                <input type="number" id="input-bathrooms" min="1" max="8" value="3" readonly>
+                <button type="button" class="step-btn" data-action="inc" data-target="input-bathrooms">+</button>
+              </div>
+            </div>
+
+            <div class="input-control">
+              <label for="input-floors">Total Floors</label>
+              <div class="stepper">
+                <button type="button" class="step-btn" data-action="dec" data-target="input-floors">−</button>
+                <input type="number" id="input-floors" min="1" max="5" value="2" readonly>
+                <button type="button" class="step-btn" data-action="inc" data-target="input-floors">+</button>
+              </div>
+            </div>
+
+            <div class="input-control">
+              <label for="input-parking">Parking Spaces</label>
+              <div class="stepper">
+                <button type="button" class="step-btn" data-action="dec" data-target="input-parking">−</button>
+                <input type="number" id="input-parking" min="0" max="6" value="2" readonly>
+                <button type="button" class="step-btn" data-action="inc" data-target="input-parking">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Condition & Furnishing -->
+        <div class="panel-card">
+          <div class="card-header">
+            <span class="icon">🛋️</span>
+            <h3>Condition & Furnishing</h3>
+          </div>
+          <div class="form-grid">
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-age">Property Age</label>
+                <span class="val-display" id="val-age">4 Years</span>
+              </div>
+              <input type="range" id="input-age" min="0" max="30" step="1" value="4" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <label>Furnishing Status</label>
+              <div class="toggle-group" id="furnishing-toggle">
+                <button type="button" class="toggle-btn" data-val="0">Unfurnished</button>
+                <button type="button" class="toggle-btn active" data-val="1">✨ Furnished</button>
+              </div>
+              <input type="hidden" id="input-furnished" value="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Neighborhood & Connectivity -->
+        <div class="panel-card">
+          <div class="card-header">
+            <span class="icon">📍</span>
+            <h3>Location & Infrastructure</h3>
+          </div>
+          <div class="form-grid">
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-location">Location Rating (1-10)</label>
+                <span class="val-display badge-accent" id="val-location">Score: 9 / 10</span>
+              </div>
+              <input type="range" id="input-location" min="1" max="10" step="1" value="9" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-crime">Crime Index (Lower is Better)</label>
+                <span class="val-display" id="val-crime">2.4</span>
+              </div>
+              <input type="range" id="input-crime" min="0.5" max="10.0" step="0.1" value="2.4" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-metro">Distance to Metro (km)</label>
+                <span class="val-display" id="val-metro">1.2 km</span>
+              </div>
+              <input type="range" id="input-metro" min="0.1" max="10.0" step="0.1" value="1.2" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-hospital">Distance to Hospital (km)</label>
+                <span class="val-display" id="val-hospital">1.6 km</span>
+              </div>
+              <input type="range" id="input-hospital" min="0.2" max="10.0" step="0.1" value="1.6" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-school">Distance to School (km)</label>
+                <span class="val-display" id="val-school">0.5 km</span>
+              </div>
+              <input type="range" id="input-school" min="0.1" max="8.0" step="0.1" value="0.5" class="custom-slider">
+            </div>
+
+            <div class="input-control">
+              <div class="label-row">
+                <label for="input-tax">Annual Property Tax (₹)</label>
+                <span class="val-display" id="val-tax">₹34,000</span>
+              </div>
+              <input type="range" id="input-tax" min="5000" max="80000" step="1000" value="34000" class="custom-slider">
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Right Column: Live Output & Insights -->
+    <aside class="results-panel">
+      <!-- Main Price Display Card -->
+      <div class="panel-card prediction-card glow-card">
+        <div class="card-tag" id="active-model-title">Linear Regression Valuation</div>
+        <div class="price-hero">
+          <span class="currency-symbol">₹</span>
+          <span class="price-value" id="display-price-short">1.11 Cr</span>
+        </div>
+        <div class="price-exact" id="display-price-exact">₹11,050,032 Estimated Value</div>
+
+        <!-- Dual Comparison Box (Visible in 'both' mode) -->
+        <div class="dual-comparison-box" id="dual-comparison-box" style="display: none;">
+          <div class="dual-row">
+            <span class="dual-model-label">📈 Linear Regression</span>
+            <span class="dual-model-price" id="dual-lr-price">₹1.11 Cr</span>
+          </div>
+          <div class="dual-row">
+            <span class="dual-model-label">🌳 Decision Tree</span>
+            <span class="dual-model-price" id="dual-dt-price">₹1.12 Cr</span>
+          </div>
+          <div class="dual-row agreement-row">
+            <span>Model Agreement</span>
+            <span class="text-emerald" id="dual-agreement">98.5% Consensus</span>
+          </div>
+        </div>
+
+        <div class="price-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Unit Valuation</span>
+            <span class="meta-value" id="display-price-sqft">₹7,367 / sqft</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">95% Confidence Band</span>
+            <span class="meta-value" id="display-price-range">₹1.08 Cr – ₹1.13 Cr</span>
+          </div>
+        </div>
+
+        <div class="confidence-bar-container">
+          <div class="bar-header">
+            <span id="reliability-label">Linear Regression Accuracy</span>
+            <span class="text-emerald" id="reliability-score">99.78% R²</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="reliability-bar" style="width: 99.78%;"></div>
+          </div>
+          <span class="accuracy-footnote" id="reliability-footnote">Mean Error: ±₹2.10 Lakhs (MAPE: 2.31%)</span>
+        </div>
+      </div>
+
+      <!-- Feature Impact Breakdown -->
+      <div class="panel-card">
+        <div class="card-header">
+          <span class="icon">📊</span>
+          <h3 id="breakdown-title">Top Value Determinants</h3>
+        </div>
+        <p class="section-desc" id="breakdown-desc">Linear regression weights for current configuration:</p>
+        <div class="impact-list" id="impact-breakdown">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Model Specifications -->
+      <div class="panel-card specs-card">
+        <div class="card-header">
+          <span class="icon">⚙️</span>
+          <h3>Algorithms Head-to-Head</h3>
+        </div>
+        <table class="specs-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Linear Reg.</th>
+              <th>Decision Tree</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Test R² Score</td>
+              <td class="text-emerald font-bold">99.78%</td>
+              <td class="text-emerald font-bold">99.57%</td>
+            </tr>
+            <tr>
+              <td>Test RMSE</td>
+              <td>₹2.55 Lakh</td>
+              <td>₹3.59 Lakh</td>
+            </tr>
+            <tr>
+              <td>Test MAE</td>
+              <td>₹2.10 Lakh</td>
+              <td>₹2.73 Lakh</td>
+            </tr>
+            <tr>
+              <td>Test MAPE</td>
+              <td>2.31%</td>
+              <td>2.91%</td>
+            </tr>
+            <tr>
+              <td>Key Advantage</td>
+              <td>Smooth Rates</td>
+              <td>Non-linear Splits</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <p>© 2026 AuraEstate AI • Linear Regression & Decision Tree Regressors</p>
+      <p class="footer-sub">Trained on 97 Validated Real Estate Properties • FastAPI & Scikit-Learn Engine</p>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
